@@ -1,4 +1,4 @@
-﻿﻿function Test-Admin {
+function Test-Admin {
     $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
     $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 }
@@ -70,7 +70,9 @@ function LoadingAnimation {
         Start-Sleep -Milliseconds 100
     }
     Write-Host ""
+    Write-Host ""
     Write-Host "Loaded"
+    Write-Host ""
 }
 
 LoadingAnimation
@@ -98,9 +100,14 @@ function ClearLogs {
             cmd /c "fsutil usn deletejournal /d c:"
             Write-Host "Journal deleted" -ForegroundColor DarkRed
         }
+
+        "2" {
+          
+          Write-host "Clear Regedit Logs...." -ForegroundColor DarkRed
+          cmd /c "reg delete HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store /f /va  & reg delete HKEY_CURRENT_USER\Software\WinRAR\ArcHistory /f /va & reg delete HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU\dll /f /va & reg delete HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU\exe /f /va & reg delete HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU\exe /f /va & reg delete HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs /f /va & reg delete HKEY_CLASSES_ROOT\Local Settings\Software\Microsoft\Windows\Shell\MuiCache /f /va & reg delete HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery /f /va "
     }
 }
-
+}
 
 function HideRecord {
 
@@ -182,19 +189,29 @@ function Hide-ExtensionBar {
 }
 
 
-Hide-ExtensionBar
+function DateModificator {
 
+$path = Read-Host "Cheat Path:"
 
+if (Test-Path $path) {
+    $newDate = New-Object DateTime(2023, 2, 14, 12, 0, 0)
+    (Get-Item $path).LastWriteTime = $newDate
+    Write-Host "Correctly Modify new date = $newDate"
+} else {
+    Write-Host "Incorrect Path." -ForegroundColor DarkRed
+}
+
+}
 
 function StopServices {
     Write-Host "Select Option:" -ForegroundColor DarkRed
     Write-Host ""
-    Write-Host "1) Bam"
-    Write-Host "2) DPS"
-    Write-Host "3) DiagTrack"
-    Write-Host "4) Sysmain"
+    Write-Host "1) Bam" -ForegroundColor DarkRed
+    Write-Host "2) DPS" -ForegroundColor DarkRed
+    Write-Host "3) DiagTrack" -ForegroundColor DarkRed
+    Write-Host "4) Sysmain" -ForegroundColor DarkRed
     Write-Host ""
-    
+   
     $opcion = Read-Host "Select"
     
     switch ($opcion) {
@@ -203,15 +220,52 @@ function StopServices {
         "3" { Stop-Service -Name "DiagTrack" -Force; Write-Host "DiagTrack' Stopped" -ForegroundColor DarkRed }
         "4" { Stop-Service -Name "Sysmain" -Force; Write-Host "'Sysmain' Stopped" -ForegroundColor DarkRed }
         default { Write-Host "Opción no válida." -ForegroundColor DarkRed }
+        
+        
     }
+}
+
+function ChangeExtension {
+
+
+$path = Read-Host "Enter the path file"
+
+if (-Not (Test-Path $path)) {
+    Write-Host "unknown file. Verify the path."
+    exit
+}
+
+$newExtension = Read-Host "enter new extension (Opciones: Exe, mp4, PDF, DLL)"
+
+switch ($newExtension.ToLower()) {
+    'exe' { $newExtension = 'exe' }
+    'mp4' { $newExtension = 'mp4' }
+    'pdf' { $newExtension = 'pdf' }
+    'dll' { $newExtension = 'dll' }
+    default {
+        Write-Host "Invalid extension. select: Exe, mp4, PDF, DLL."
+        exit
+    }
+}
+
+$filenameWithoutExtension = [System.IO.Path]::GetFileNameWithoutExtension($path)
+$directory = [System.IO.Path]::GetDirectoryName($path)
+$newPath = Join-Path -Path $directory -ChildPath "$filenameWithoutExtension.$newExtension"
+
+Rename-Item -Path $path -NewName $newPath
+Write-Host "Extension Changed !: $newPath"
+
+
+
 }
 
 
 function ExecuteCheats {
     Write-Host "Execute Cheats:" -ForegroundColor DarkRed
     Write-Host ""
-    Write-Host "1) Start exe"
-    Write-Host "2) Start dll"
+    Write-Host "1) Start Jar"
+    Write-Host "2) Start exe"
+    Write-Host "3) Start dll"
     Write-Host ""
     
     $opcion = Read-Host "Select"
@@ -219,32 +273,33 @@ function ExecuteCheats {
 
 
     switch ($opcion) {
-        "1" { cmd /c "start $path /c vschost.exe"; Write-Host "Starting exe: $path" -ForegroundColor DarkRed }
-        "2" { cmd.exe /c "start $path /c vschost.exel"  "Starting dll: $path" -ForegroundColor DarkRed }
+        "1" { cmd /c "java -jar $path" }
+        "2" { cmd /c "start $path /c vschost.exe"; Write-Host "Starting exe: $path" -ForegroundColor DarkRed }
+        "3" { cmd.exe /c "start $path /c vschost.exel"  "Starting dll: $path" -ForegroundColor DarkRed }
         default { Write-Host "Incorrect Option." -ForegroundColor DarkRed }
     }
+
 }
 
-$ancho = 40
-$alto = 9
 
-Write-Host ("+" + "-" * ($ancho - 2) + "+")
-for ($i = 0; $i -lt ($alto - 2); $i++) {
-    if ($i -eq 1) {
-        Write-Host ("| " + "Select Category:" + " " * ($ancho - 2 - 18) + "|")
-    } elseif ($i -eq 2) {
-        Write-Host ("| " + "1) ClearLogs" + " " * ($ancho - 2 - 15) + "|")
-    } elseif ($i -eq 3) {
-        Write-Host ("| " + "2) Execute" + " " * ($ancho - 2 - 12) + "|")
-    } elseif ($i -eq 4) {
-        Write-Host ("| " + "3) Stop Services" + " " * ($ancho - 2 - 18) + "|")
-    } elseif ($i -eq 5) {
-        Write-Host ("| " + "4) Hide Record" + " " * ($ancho - 2 - 15) + "|")
-    } else {
-        Write-Host ("|" + " " * ($ancho - 2) + "|")
-    }
-}
-Write-Host ("+" + "-" * ($ancho - 2) + "+")
+$line = "=" * 29
+$separator = "-" * 27
+
+$cuadro = @"
+$line
+|       Select:       |
+$separator
+|  1) Clear-Logs           |
+|  2) Execute              |
+|  3) Stop-Services        |
+|  4) Hide-Record          |
+|  5) Date-Modificator     |
+|  6) Change-Extension     |
+$line
+"@
+
+
+Write-Host $cuadro
 
 $opcion = Read-Host "Select Category"
 switch ($opcion) {
@@ -252,6 +307,7 @@ switch ($opcion) {
     "2" { ExecuteCheats }
     "3" { StopServices }
     "4" { HideRecord }
+    "5" { DateModificator }
+    "6" { ChangeExtension }
     default { Write-Host "Incorrectly Option" -ForegroundColor DarkRed }
 }
-
